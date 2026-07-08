@@ -1,0 +1,20 @@
+/* [project]/aesthetic_emotion_recommender/app/globals.css [app-client] (css) */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+main {
+  min-height: 100vh;
+  padding: 48px;
+}
+
+/*# sourceMappingURL=aesthetic_emotion_recommender_app_globals_0ewx1cz.css.map*/

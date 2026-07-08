@@ -1,0 +1,50 @@
+globalThis.__BUILD_MANIFEST = {
+  "pages": {
+    "/_app": [
+      "static/chunks/1jd8_next_dist_compiled_0-fh-pf._.js",
+      "static/chunks/1jd8_next_dist_shared_lib_0rj-51d._.js",
+      "static/chunks/1jd8_next_dist_client_1ilyafu._.js",
+      "static/chunks/1jd8_next_dist_16eywkj._.js",
+      "static/chunks/1jd8_next_app_0ipimt-.js",
+      "static/chunks/[next]_entry_page-loader_ts_1dcvuh5._.js",
+      "static/chunks/1jd8_react-dom_1xazesh._.js",
+      "static/chunks/1jd8_0-pbklm._.js",
+      "static/chunks/[root-of-the-server]__0z201zn._.js",
+      "static/chunks/aesthetic_emotion_recommender_pages__app_0du2_q-._.js",
+      "static/chunks/turbopack-aesthetic_emotion_recommender_pages__app_14485p9._.js"
+    ],
+    "/_error": [
+      "static/chunks/1jd8_next_dist_compiled_0-fh-pf._.js",
+      "static/chunks/1jd8_next_dist_shared_lib_194njcz._.js",
+      "static/chunks/1jd8_next_dist_client_1ilyafu._.js",
+      "static/chunks/1jd8_next_dist_0k2kv-7._.js",
+      "static/chunks/[next]_entry_page-loader_ts_1_5h8u6._.js",
+      "static/chunks/1jd8_react-dom_1xazesh._.js",
+      "static/chunks/1jd8_0-pbklm._.js",
+      "static/chunks/[root-of-the-server]__01wcun6._.js",
+      "static/chunks/aesthetic_emotion_recommender_pages__error_0du2_q-._.js",
+      "static/chunks/turbopack-aesthetic_emotion_recommender_pages__error_17sdata._.js"
+    ]
+  },
+  "devFiles": [],
+  "polyfillFiles": [
+    "static/chunks/1jd8_next_dist_build_polyfills_polyfill-nomodule.js"
+  ],
+  "lowPriorityFiles": [
+    "static/development/_buildManifest.js",
+    "static/development/_ssgManifest.js",
+    "static/development/_clientMiddlewareManifest.js"
+  ],
+  "rootMainFiles": [
+    "static/chunks/[turbopack]_browser_dev_hmr-client_hmr-client_ts_1ubbxfy._.js",
+    "static/chunks/1jd8_next_dist_compiled_next-devtools_index_16g14b7.js",
+    "static/chunks/1jd8_next_dist_compiled_react-dom_05q6fph._.js",
+    "static/chunks/1jd8_next_dist_compiled_react-server-dom-turbopack_0t2nm3s._.js",
+    "static/chunks/1jd8_next_dist_compiled_1f_38_9._.js",
+    "static/chunks/1jd8_next_dist_client_0uzgpda._.js",
+    "static/chunks/1jd8_next_dist_15_9s7u._.js",
+    "static/chunks/1jd8_@swc_helpers_cjs_1gcpri3._.js",
+    "static/chunks/aesthetic_emotion_recommender_1anvha4._.js",
+    "static/chunks/turbopack-aesthetic_emotion_recommender_0l3p8x5._.js"
+  ]
+};

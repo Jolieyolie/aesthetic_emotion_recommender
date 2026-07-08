@@ -1,37 +1,45 @@
-import { supabaseAdmin } from "../../../lib/supabaseAdmin";
+import { NextResponse } from "next/server";
+import { supabase } from "../../../src/lib/supabaseClient";
 
-const NextResponse = {
-  json(body: unknown, init?: { status?: number }) {
-    return new Response(JSON.stringify(body), {
-      status: init?.status,
-      headers: { "Content-Type": "application/json" },
-    });
-  },
-};
+type EventType = "seen" | "selected" | "deselected";
 
 export async function POST(req: Request) {
   try {
-    const { imageId, cloudinaryPublicId, userId } = await req.json();
+    const {
+      imageId,
+      sessionId,
+      eventType,
+    }: {
+      imageId: number;
+      sessionId: string;
+      eventType: EventType;
+    } = await req.json();
 
-    if (!imageId || !cloudinaryPublicId) {
+    if (!imageId || !sessionId || !eventType) {
       return NextResponse.json(
-        { error: "Missing imageId or cloudinaryPublicId" },
+        { error: "Missing imageId, sessionId, or eventType" },
         { status: 400 },
       );
     }
 
-    const { data, error } = await supabaseAdmin
-      .from("image_selections")
+    if (!["seen", "selected", "deselected"].includes(eventType)) {
+      return NextResponse.json({ error: "Invalid eventType" }, { status: 400 });
+    }
+
+    const selected = eventType === "selected" ? 1 : 0;
+
+    const { data, error } = await supabase
+      .from("image_interactions")
       .upsert(
         {
-          user_id: userId ?? null,
+          session_id: sessionId,
           image_id: imageId,
-          cloudinary_public_id: cloudinaryPublicId,
-          selected: true,
-          model_status: "pending",
+          event_type: eventType,
+          selected,
+          updated_at: new Date().toISOString(),
         },
         {
-          onConflict: "user_id,image_id",
+          onConflict: "session_id,image_id",
         },
       )
       .select();
@@ -42,9 +50,9 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       success: true,
-      selection: data,
+      interaction: data,
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "Invalid request body" },
       { status: 400 },

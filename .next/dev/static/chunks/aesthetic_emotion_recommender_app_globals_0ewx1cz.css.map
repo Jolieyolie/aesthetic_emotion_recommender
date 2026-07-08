@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 1, "column": 0}, "map": {"version":3,"sources":["file:///home/jolieyolie/web_dev_programme/aesthetic_emotion_recommender/app/globals.css"],"sourcesContent":["* {\n  box-sizing: border-box;\n}\n\nhtml,\nbody {\n  margin: 0;\n  min-height: 100%;\n}\n\nbody {\n  font-family: Arial, Helvetica, sans-serif;\n}\n\nmain {\n  min-height: 100vh;\n  padding: 48px;\n}\n"],"names":[],"mappings":"AAAA;;;;AAIA;;;;;AAMA;;;;AAIA"}}]
+}

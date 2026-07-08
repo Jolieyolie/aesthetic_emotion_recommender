@@ -1,20 +1,12 @@
-import { supabaseAdmin } from "../lib/supabaseAdmin";
-// POST /api/selections
+import ImageSelectionGrid from "./components/ImageSelectionGrid";
 
-const { imageId, cloudinaryPublicId, userId } = await req.json();
+function App() {
+  return (
+    <main className="p-6">
+      <h1 className="mb-6 text-2xl font-bold">Select Images</h1>
+      <ImageSelectionGrid />
+    </main>
+  );
+}
 
-const { data, error } = await supabaseAdmin
-  .from("image_selections")
-  .upsert(
-    {
-      user_id: userId ?? null,
-      image_id: imageId,
-      cloudinary_public_id: cloudinaryPublicId,
-      selected: true,
-      model_status: "pending",
-    },
-    {
-      onConflict: "user_id,image_id",
-    },
-  )
-  .select();
+export default App;
