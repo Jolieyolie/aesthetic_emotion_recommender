@@ -25,6 +25,14 @@ The notebook can fine-tune these 21 emotion values with:
 
 This initializes item emotion values from the LLM ratings, then lets training move them while penalizing large drift from the initialization. The notebook includes a feature-drift report to inspect which emotion dimensions changed most.
 
+To switch experiment settings, change `SCENARIO_NAME` in the notebook:
+
+- `fixed_emotions`: fixed LLM emotion values; baseline.
+- `trainable_anchored`: trainable emotion values with moderate anchoring; default.
+- `trainable_weak_anchor`: trainable emotion values with weaker anchoring.
+- `feature_only_pressure`: lower latent capacity and full item-id dropout, forcing more signal through emotion features.
+- `high_capacity_cf`: larger latent capacity and low item-id dropout, allowing collaborative embeddings to explain more.
+
 Install dependencies:
 
 ```bash
