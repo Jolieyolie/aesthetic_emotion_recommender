@@ -6,6 +6,14 @@ Standalone PyTorch prototype notebook:
 
 Expected ratings input:
 
+- preferred path: `data/image_ratings_rows.csv`
+- preferred shape: one observed rating per row
+- columns: `session_id`, `image_id`, `rating`
+- mapping: `session_id` is the user id, `image_id` is the item id
+- rating values: `true`/`false` or `1`/`0`
+
+The notebook also supports the older wide matrix format:
+
 - path: `data/ratings_matrix.csv`
 - shape: users x items
 - first column: user id, preferably named `user_id`
