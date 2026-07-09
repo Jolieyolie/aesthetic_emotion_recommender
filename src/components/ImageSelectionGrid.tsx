@@ -4,6 +4,8 @@ import { Check } from "lucide-react";
 
 const IMAGE_TABLE =
   import.meta.env.VITE_SUPABASE_IMAGE_TABLE?.trim() || "images";
+const EVENT_TABLE =
+  import.meta.env.VITE_SUPABASE_EVENT_TABLE?.trim() || "image_event";
 const TOTAL_BATCHES = 16;
 const FIRST_BATCH_ID = 0;
 const LAST_BATCH_ID = FIRST_BATCH_ID + TOTAL_BATCHES - 1;
