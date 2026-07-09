@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
+import { Check } from "lucide-react";
 
 const IMAGE_TABLE =
   import.meta.env.VITE_SUPABASE_IMAGE_TABLE?.trim() || "images";
@@ -34,10 +35,24 @@ export default function ImageSelectionGrid() {
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
 
+  const selectedIdsRef = useRef<Set<number>>(new Set());
+  const imageButtonRefs = useRef<Map<number, HTMLButtonElement>>(new Map());
+  const imageByIdRef = useRef<Map<number, ImageItem>>(new Map());
+  const visibleImageIdsRef = useRef<Set<number>>(new Set());
+  const seenLoggedRef = useRef<Set<number>>(new Set());
+  const interactedImageIdsRef = useRef<Set<number>>(new Set());
   const loaderRef = useRef<HTMLDivElement | null>(null);
   const loadingRef = useRef(false);
-
   const hasMore = currentBatchId < LAST_BATCH_ID;
+  useEffect(() => {
+    selectedIdsRef.current = selectedIds;
+  }, [selectedIds]);
+
+  useEffect(() => {
+    imageByIdRef.current = new Map(
+      images.map((image) => [image.image_id, image]),
+    );
+  }, [images]);
 
   const loadBatch = useCallback(async (batchId: number) => {
     if (loadingRef.current) return;
@@ -118,14 +133,91 @@ export default function ImageSelectionGrid() {
     };
   }, [hasMore, loadNextBatch]);
 
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const element = entry.target as HTMLElement;
+          const imageId = Number(element.dataset.imageId);
+
+          if (!Number.isFinite(imageId)) return;
+
+          if (entry.isIntersecting) {
+            visibleImageIdsRef.current.add(imageId);
+            return;
+          }
+
+          const wasVisible = visibleImageIdsRef.current.has(imageId);
+
+          visibleImageIdsRef.current.delete(imageId);
+
+          if (!wasVisible) return;
+          if (selectedIdsRef.current.has(imageId)) return;
+          if (seenLoggedRef.current.has(imageId)) return;
+          if (interactedImageIdsRef.current.has(imageId)) return;
+
+          const image = imageByIdRef.current.get(imageId);
+
+          if (!image) return;
+
+          seenLoggedRef.current.add(imageId);
+          void logImageEvent(image, 0, "seen");
+        });
+      },
+      {
+        root: null,
+        threshold: 0.5,
+      },
+    );
+
+    imageButtonRefs.current.forEach((button) => {
+      observer.observe(button);
+    });
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [images]);
+
+  async function logImageEvent(
+    image: ImageItem,
+    eventType: 0 | 1,
+    eventName: "seen" | "selected" | "deselected",
+  ) {
+    const visitorId = getVisitorId();
+
+    const { error } = await supabase.from("image_events").insert({
+      visitor_id: visitorId,
+      image_id: image.image_id,
+      event_type: eventType,
+      event_name: eventName,
+      style: image.style,
+      motif: image.motif,
+      instance: image.instance,
+      batch_id: image.batch_id,
+      target_url: image.target_url,
+    });
+
+    if (error) {
+      console.error("Error logging image event:", error.message);
+    }
+  }
   async function handleImageClick(image: ImageItem) {
     const visitorId = getVisitorId();
 
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      next.add(image.image_id);
-      return next;
-    });
+    const wasSelected = selectedIdsRef.current.has(image.image_id);
+    const nextSelected = !wasSelected;
+    const eventType = nextSelected ? 1 : 0;
+    const eventName = nextSelected ? "selected" : "deselected";
+    const nextIds = new Set(selectedIdsRef.current);
+    if (nextSelected) {
+      nextIds.add(image.image_id);
+    } else {
+      nextIds.delete(image.image_id);
+    }
+
+    selectedIdsRef.current = nextIds;
+    setSelectedIds(nextIds);
 
     const { error } = await supabase.from("image_selections").upsert(
       {
@@ -136,7 +228,7 @@ export default function ImageSelectionGrid() {
         instance: image.instance,
         batch_id: image.batch_id,
         target_url: image.target_url,
-        selected: true,
+        selected: nextSelected,
       },
       {
         onConflict: "visitor_id,image_id",
@@ -146,6 +238,7 @@ export default function ImageSelectionGrid() {
     if (error) {
       console.error("Error saving selected image:", error.message);
     }
+    await logImageEvent(image, eventType, eventName);
   }
 
   return (
@@ -167,7 +260,16 @@ export default function ImageSelectionGrid() {
           return (
             <button
               key={image.image_id}
+              ref={(node) => {
+                if (node) {
+                  imageButtonRefs.current.set(image.image_id, node);
+                } else {
+                  imageButtonRefs.current.delete(image.image_id);
+                }
+              }}
+              data-image-id={image.image_id}
               type="button"
+              aria-pressed={selected}
               onClick={() => handleImageClick(image)}
               className={[
                 "relative overflow-hidden rounded-xl border-4 bg-white transition-all duration-200",
@@ -185,8 +287,11 @@ export default function ImageSelectionGrid() {
               />
 
               {selected && (
-                <div className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-orange-500 text-sm font-bold text-white shadow-md">
-                  Selected
+                <div
+                  aria-label="Selected"
+                  className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-orange-500 text-white shadow-md"
+                >
+                  <Check className="h-4 w-4" strokeWidth={3} />
                 </div>
               )}
             </button>
