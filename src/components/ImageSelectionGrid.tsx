@@ -16,17 +16,7 @@ type ImageItem = {
   batch_id: number;
   target_url: string;
 };
-
-function getVisitorId() {
-  let visitorId = localStorage.getItem("visitor_id");
-
-  if (!visitorId) {
-    visitorId = crypto.randomUUID();
-    localStorage.setItem("visitor_id", visitorId);
-  }
-
-  return visitorId;
-}
+type ImageEventType = "seen" | "selected" | "deselected";
 
 export default function ImageSelectionGrid() {
   const [images, setImages] = useState<ImageItem[]>([]);
@@ -35,6 +25,7 @@ export default function ImageSelectionGrid() {
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
 
+  const sessionIdRef = useRef(crypto.randomUUID());
   const selectedIdsRef = useRef<Set<number>>(new Set());
   const imageButtonRefs = useRef<Map<number, HTMLButtonElement>>(new Map());
   const imageByIdRef = useRef<Map<number, ImageItem>>(new Map());
@@ -44,6 +35,7 @@ export default function ImageSelectionGrid() {
   const loaderRef = useRef<HTMLDivElement | null>(null);
   const loadingRef = useRef(false);
   const hasMore = currentBatchId < LAST_BATCH_ID;
+  console.log("[session] current session id:", sessionIdRef.current);
   useEffect(() => {
     selectedIdsRef.current = selectedIds;
   }, [selectedIds]);
@@ -161,7 +153,7 @@ export default function ImageSelectionGrid() {
           if (!image) return;
 
           seenLoggedRef.current.add(imageId);
-          void logImageEvent(image, 0, "seen");
+          void logImageEvent(image, "seen");
         });
       },
       {
@@ -179,37 +171,70 @@ export default function ImageSelectionGrid() {
     };
   }, [images]);
 
-  async function logImageEvent(
-    image: ImageItem,
-    eventType: 0 | 1,
-    eventName: "seen" | "selected" | "deselected",
+  /*async function logImageEvent(
+   image: ImageItem,
+    eventType: "seen" | "selected" | "deselected",
   ) {
-    const visitorId = getVisitorId();
-
     const { error } = await supabase.from("image_events").insert({
-      visitor_id: visitorId,
       image_id: image.image_id,
+      session_id: sessionIdRef.current,
       event_type: eventType,
-      event_name: eventName,
-      style: image.style,
-      motif: image.motif,
-      instance: image.instance,
       batch_id: image.batch_id,
-      target_url: image.target_url,
     });
 
     if (error) {
       console.error("Error logging image event:", error.message);
     }
+  } */
+  //test
+  async function logImageEvent(image: ImageItem, eventType: ImageEventType) {
+    const payload = {
+      image_id: image.image_id,
+      session_id: sessionIdRef.current,
+      event_type: eventType,
+      batch_id: image.batch_id,
+    };
+
+    console.log("[image_event] inserting payload:", payload);
+
+    const { data, error } = await supabase
+      .from("image_event")
+      .insert(payload)
+      .select();
+
+    if (error) {
+      console.error("[image_event] insert failed:", {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code,
+      });
+      return;
+    }
+
+    console.log("[image_event] insert success:", data);
   }
+  //test end
+  //test
   async function handleImageClick(image: ImageItem) {
-    const visitorId = getVisitorId();
+    console.log("[click] image clicked:", image);
 
     const wasSelected = selectedIdsRef.current.has(image.image_id);
     const nextSelected = !wasSelected;
-    const eventType = nextSelected ? 1 : 0;
-    const eventName = nextSelected ? "selected" : "deselected";
+    const eventType: ImageEventType = nextSelected ? "selected" : "deselected";
+
+    console.log("[click] selection state:", {
+      image_id: image.image_id,
+      wasSelected,
+      nextSelected,
+      eventType,
+      session_id: sessionIdRef.current,
+    });
+
+    interactedImageIdsRef.current.add(image.image_id);
+
     const nextIds = new Set(selectedIdsRef.current);
+
     if (nextSelected) {
       nextIds.add(image.image_id);
     } else {
@@ -219,27 +244,28 @@ export default function ImageSelectionGrid() {
     selectedIdsRef.current = nextIds;
     setSelectedIds(nextIds);
 
-    const { error } = await supabase.from("image_selections").upsert(
-      {
-        visitor_id: visitorId,
-        image_id: image.image_id,
-        style: image.style,
-        motif: image.motif,
-        instance: image.instance,
-        batch_id: image.batch_id,
-        target_url: image.target_url,
-        selected: nextSelected,
-      },
-      {
-        onConflict: "visitor_id,image_id",
-      },
-    );
-
-    if (error) {
-      console.error("Error saving selected image:", error.message);
-    }
-    await logImageEvent(image, eventType, eventName);
+    await logImageEvent(image, eventType);
   }
+  //test end
+
+  /*   async function handleImageClick(image: ImageItem) {
+    const wasSelected = selectedIdsRef.current.has(image.image_id);
+    const nextSelected = !wasSelected;
+    const eventType: ImageEventType = nextSelected ? "selected" : "deselected";
+    interactedImageIdsRef.current.add(image.image_id);
+    const nextIds = new Set(selectedIdsRef.current);
+
+    if (nextSelected) {
+      nextIds.add(image.image_id);
+    } else {
+      nextIds.delete(image.image_id);
+    }
+
+    selectedIdsRef.current = nextIds;
+    setSelectedIds(nextIds);
+
+    await logImageEvent(image, eventType);
+  } */
 
   return (
     <div className="space-y-6">
