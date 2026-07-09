@@ -171,8 +171,8 @@ export default function ImageSelectionGrid() {
     };
   }, [images]);
 
-  /*async function logImageEvent(
-   image: ImageItem,
+  async function logImageEvent(
+    image: ImageItem,
     eventType: "seen" | "selected" | "deselected",
   ) {
     const { error } = await supabase.from("image_events").insert({
@@ -185,9 +185,9 @@ export default function ImageSelectionGrid() {
     if (error) {
       console.error("Error logging image event:", error.message);
     }
-  } */
+  }
   //test
-  async function logImageEvent(image: ImageItem, eventType: ImageEventType) {
+  /* async function logImageEvent(image: ImageItem, eventType: ImageEventType) {
     const payload = {
       image_id: image.image_id,
       session_id: sessionIdRef.current,
@@ -213,10 +213,10 @@ export default function ImageSelectionGrid() {
     }
 
     console.log("[image_event] insert success:", data);
-  }
+  } */
   //test end
   //test
-  async function handleImageClick(image: ImageItem) {
+  /* async function handleImageClick(image: ImageItem) {
     console.log("[click] image clicked:", image);
 
     const wasSelected = selectedIdsRef.current.has(image.image_id);
@@ -245,10 +245,10 @@ export default function ImageSelectionGrid() {
     setSelectedIds(nextIds);
 
     await logImageEvent(image, eventType);
-  }
+  } */
   //test end
 
-  /*   async function handleImageClick(image: ImageItem) {
+  async function handleImageClick(image: ImageItem) {
     const wasSelected = selectedIdsRef.current.has(image.image_id);
     const nextSelected = !wasSelected;
     const eventType: ImageEventType = nextSelected ? "selected" : "deselected";
@@ -265,7 +265,7 @@ export default function ImageSelectionGrid() {
     setSelectedIds(nextIds);
 
     await logImageEvent(image, eventType);
-  } */
+  }
 
   return (
     <div className="space-y-6">
