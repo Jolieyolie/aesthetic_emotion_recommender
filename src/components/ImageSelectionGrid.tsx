@@ -175,7 +175,7 @@ export default function ImageSelectionGrid() {
     image: ImageItem,
     eventType: "seen" | "selected" | "deselected",
   ) {
-    const { error } = await supabase.from("image_events").insert({
+    const { error } = await supabase.from("image_event").insert({
       image_id: image.image_id,
       session_id: sessionIdRef.current,
       event_type: eventType,
